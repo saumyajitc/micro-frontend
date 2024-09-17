@@ -1,15 +1,14 @@
-name: deploy-container
-
+name: deploy-marketing
 on:
     push:
         branches:
             - main
         paths:
-            - 'packages/container/**'
+            - 'packages/marketing/**'
 
 defaults:
     run:
-        working-directory: packages/container
+        working-directory: packages/marketing
 
 jobs:
   build:
@@ -17,9 +16,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: npm install &&  npm run build 
-        env:
-          PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
+      - run: npm install &&  npm run build
 
       # Configure AWS credentials
       - name: Configure AWS credentials
@@ -31,11 +28,11 @@ jobs:
 
       # Sync build files to S3 bucket
       - name: Deploy to S3
-        run: aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET_NAME }}/container/latest
+        run: aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET_NAME }}/marketing/latest
 
       # Invalidate CloudFront cache (if needed)
       - name: Invalidate CloudFront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/container/latest/index.html"
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/marketing/latest/remoteEntry.js"
         env:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
